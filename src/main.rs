@@ -1,9 +1,18 @@
 mod board;
 mod domino;
 
-pub use board::Board;
-pub use domino::Domino;
+const LEVEL: &str = r"
+----------
+|--------|
+||------||
+|||----|||
+||||--||||
+||||--||||
+|||----|||
+||------||
+|--------|
+";
 
 fn main() {
-    println!("Hello, world!");
+    let _board = board::generator::generate_from_string(LEVEL);
 }

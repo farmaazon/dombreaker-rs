@@ -1,9 +1,11 @@
+pub mod generator;
+
 use crate::domino;
-use crate::Domino;
+use crate::domino::Domino;
 
 pub type Coord = u8;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, Hash, PartialEq)]
 pub struct Position {
     pub x: Coord,
     pub y: Coord,
@@ -65,12 +67,12 @@ impl Board {
         self.tiles[self.index_of_tile(position)]
     }
 
-    pub fn domino(&self, id: domino::Id) -> &Domino {
-        &self.dominoes[&id]
+    pub fn domino_values_mut(&mut self, id: domino::Id) -> &mut domino::Values {
+        &mut self.dominoes.get_mut(&id).unwrap().values
     }
 
-    pub fn dominoes(&self) -> impl Iterator<Item = (domino::Id, &Domino)> {
-        self.dominoes.iter().map(|(id, dom)| (*id, dom))
+    pub fn dominoes(&self) -> &std::collections::BTreeMap<domino::Id, Domino> {
+        &self.dominoes
     }
 
     pub fn put_domino(&mut self, domino: Domino) -> u8 {
@@ -105,7 +107,11 @@ impl Board {
     }
 
     fn index_of_tile(&self, position: Position) -> usize {
-        (position.y * self.width + position.x) as usize
+        let index = (position.y * self.width + position.x) as usize;
+        if position.x >= self.width || index >= self.tiles.len() {
+            panic!("Tile {} out of bounds", position);
+        }
+        index
     }
 
     fn tile_mut(&mut self, position: Position) -> &mut Tile {
@@ -139,14 +145,12 @@ mod test {
         let mut board = Board::new(3, 3);
 
         let first_domino = Domino {
-            head_value: 1,
-            tail_value: 2,
+            values: (1, 2).into(),
             position: (0, 0).into(),
             orientation: domino::Orientation::Vertical,
         };
         let second_domino = Domino {
-            head_value: 2,
-            tail_value: 6,
+            values: (2, 6).into(),
             position: (1, 1).into(),
             orientation: domino::Orientation::Horizontal,
         };
@@ -157,7 +161,7 @@ mod test {
         assert_empty(&board, (2, 1));
 
         let first_id = board.put_domino(first_domino);
-        assert_eq!(board.domino(first_id), &first_domino);
+        assert_eq!(board.dominoes[&first_id], first_domino);
         assert_eq!(board.tile((0, 0).into()), Tile::Head(first_id));
         assert_eq!(board.tile((0, 1).into()), Tile::Tail(first_id));
         assert_empty(&board, (0, 2));
@@ -166,13 +170,13 @@ mod test {
         assert_empty(&board, (1, 2));
         assert_empty(&board, (2, 1));
         assert_eq!(
-            board.dominoes().collect_vec(),
-            vec![(first_id, &first_domino)]
+            board.dominoes().iter().collect_vec(),
+            vec![(&first_id, &first_domino)]
         );
 
         let second_id = board.put_domino(second_domino);
-        assert_eq!(board.domino(first_id), &first_domino);
-        assert_eq!(board.domino(second_id), &second_domino);
+        assert_eq!(board.dominoes[&first_id], first_domino);
+        assert_eq!(board.dominoes[&second_id], second_domino);
         assert_eq!(board.tile((0, 0).into()), Tile::Head(first_id));
         assert_eq!(board.tile((0, 1).into()), Tile::Tail(first_id));
         assert_eq!(board.tile((1, 1).into()), Tile::Head(second_id));
@@ -184,8 +188,8 @@ mod test {
         assert_empty(&board, (2, 2));
 
         assert_eq!(
-            board.dominoes().collect_vec(),
-            vec![(first_id, &first_domino), (second_id, &second_domino)]
+            board.dominoes().iter().collect_vec(),
+            vec![(&first_id, &first_domino), (&second_id, &second_domino)]
         );
     }
 
@@ -194,14 +198,12 @@ mod test {
     fn colliding_dominoes() {
         let mut board = Board::new(3, 3);
         let first_domino = Domino {
-            head_value: 1,
-            tail_value: 2,
+            values: (1, 2).into(),
             position: (1, 0).into(),
             orientation: domino::Orientation::Vertical,
         };
         let second_domino = Domino {
-            head_value: 2,
-            tail_value: 6,
+            values: (2, 6).into(),
             position: (1, 1).into(),
             orientation: domino::Orientation::Horizontal,
         };
@@ -210,17 +212,37 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn putting_outside_x_boundaries() {
+        let mut board = Board::new(3, 3);
+        board.put_domino(Domino {
+            values: (1, 2).into(),
+            position: (2, 0).into(),
+            orientation: domino::Orientation::Horizontal,
+        });
+    }
+
+    #[test]
+    #[should_panic]
+    fn putting_outside_y_boundaries() {
+        let mut board = Board::new(3, 3);
+        board.put_domino(Domino {
+            values: (1, 2).into(),
+            position: (0, 2).into(),
+            orientation: domino::Orientation::Vertical,
+        });
+    }
+
+    #[test]
     fn removing_dominoes() {
         let mut board = Board::new(3, 3);
         let first_domino = Domino {
-            head_value: 1,
-            tail_value: 2,
+            values: (1, 2).into(),
             position: (0, 0).into(),
             orientation: domino::Orientation::Vertical,
         };
         let second_domino = Domino {
-            head_value: 2,
-            tail_value: 6,
+            values: (2, 6).into(),
             position: (1, 1).into(),
             orientation: domino::Orientation::Horizontal,
         };
@@ -233,8 +255,8 @@ mod test {
         assert_eq!(board.tile((1, 1).into()), Tile::Head(second_id));
         assert_eq!(board.tile((2, 1).into()), Tile::Tail(second_id));
         assert_eq!(
-            board.dominoes().collect_vec(),
-            vec![(second_id, &second_domino)]
+            board.dominoes().iter().collect_vec(),
+            vec![(&second_id, &second_domino)]
         );
     }
 }
