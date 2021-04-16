@@ -1,4 +1,4 @@
-use crate::board::Position;
+use crate::game::board::Position;
 use std::fmt;
 
 pub type Id = u8;
@@ -14,6 +14,15 @@ pub enum Orientation {
 pub struct Values {
     pub head: Value,
     pub tail: Value,
+}
+
+impl Values {
+    pub fn swapped(self) -> Self {
+        Self {
+            head: self.tail,
+            tail: self.head,
+        }
+    }
 }
 
 impl fmt::Display for Values {

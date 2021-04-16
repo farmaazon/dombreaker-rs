@@ -1,8 +1,11 @@
-use crate::board::{Board, Tile};
-use crate::domino::Domino;
-use crate::{board, domino};
 use itertools::Itertools;
 use rand::seq::SliceRandom;
+use rand::Rng;
+
+use crate::game::board;
+use crate::game::board::{Board, Tile};
+use crate::game::domino;
+use crate::game::domino::Domino;
 
 #[derive(Copy, Clone, Debug)]
 struct DominoValuesGenerator {
@@ -22,12 +25,12 @@ impl Iterator for DominoValuesGenerator {
 
     fn next(&mut self) -> Option<Self::Item> {
         let return_value = self.next;
-        if self.next.tail == 0 {
-            self.next.tail = self.next.head + 1;
+        let current_sum = self.next.head + self.next.tail;
+        self.next.tail = self.next.tail.saturating_sub(1);
+        self.next.head = self.next.head.saturating_add(1);
+        if self.next.tail < self.next.head {
+            self.next.tail = current_sum + 1;
             self.next.head = 0;
-        } else {
-            self.next.tail -= 1;
-            self.next.head += 1;
         }
         Some(return_value)
     }
@@ -87,9 +90,14 @@ impl<'a> Generator<'a> {
 
     fn assign_values(&mut self) {
         let mut ids = self.board.dominoes().keys().cloned().collect_vec();
-        ids.shuffle(&mut rand::thread_rng());
+        let mut rng = rand::thread_rng();
+        ids.shuffle(&mut rng);
         for (id, values) in ids.iter().zip(DominoValuesGenerator::new()) {
-            *self.board.domino_values_mut(*id) = values;
+            *self.board.domino_values_mut(*id) = if rng.gen_bool(0.5) {
+                values.swapped()
+            } else {
+                values
+            }
         }
     }
 }
@@ -103,8 +111,32 @@ pub fn generate_from_string(string: &str) -> Board {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::collections::HashSet;
+
+    use super::*;
+
+    #[test]
+    fn domino_values_generator() {
+        let generated = DominoValuesGenerator::new()
+            .take(10)
+            .map(|domino::Values { head, tail }| (head, tail))
+            .collect_vec();
+        assert_eq!(
+            generated,
+            [
+                (0, 0),
+                (0, 1),
+                (0, 2),
+                (1, 1),
+                (0, 3),
+                (1, 2),
+                (0, 4),
+                (1, 3),
+                (2, 2),
+                (0, 5)
+            ]
+        )
+    }
 
     #[test]
     fn generate_single_horizontal() {
@@ -174,12 +206,17 @@ mod test {
         );
 
         let mut expected_values: HashSet<domino::Values> =
-            [(0, 0), (0, 1), (1, 0), (1, 1), (0, 2), (2, 0), (0, 3)]
+            [(0, 0), (0, 1), (0, 2), (1, 1), (0, 3), (1, 2), (0, 4)]
                 .iter()
                 .map(|x| domino::Values::from(*x))
                 .collect();
         for domino in board.dominoes().values() {
-            expected_values.remove(&domino.values);
+            assert!(
+                expected_values.remove(&domino.values)
+                    || expected_values.remove(&domino.values.swapped()),
+                "Didn't expected {} domino",
+                domino
+            );
         }
         assert_eq!(
             expected_values.into_iter().collect_vec(),

@@ -1,5 +1,6 @@
-mod board;
-mod domino;
+mod game;
+
+use game::board;
 
 const LEVEL: &str = r"
 ----------

@@ -1,7 +1,7 @@
 pub mod generator;
 
-use crate::domino;
-use crate::domino::Domino;
+use crate::game::domino;
+use crate::game::domino::Domino;
 
 pub type Coord = u8;
 
@@ -26,6 +26,55 @@ impl std::fmt::Display for Position {
 impl std::fmt::Debug for Position {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self)
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub enum Direction {
+    N,
+    NE,
+    E,
+    SE,
+    S,
+    SW,
+    W,
+    NW,
+}
+
+impl Direction {
+    fn next(self) -> Self {
+        match self {
+            Self::N => Self::NE,
+            Self::NE => Self::E,
+            Self::E => Self::SE,
+            Self::SE => Self::S,
+            Self::S => Self::SW,
+            Self::SW => Self::W,
+            Self::W => Self::NW,
+            Self::NW => Self::N,
+        }
+    }
+
+    fn iter(self) -> DirectionIter {
+        DirectionIter { next: self }
+    }
+
+    fn iter_all() -> impl Iterator<Item = Direction> {
+        Self::N.iter().take(8)
+    }
+}
+
+pub struct DirectionIter {
+    next: Direction,
+}
+
+impl Iterator for DirectionIter {
+    type Item = Direction;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.next;
+        self.next = self.next.next();
+        Some(next)
     }
 }
 
@@ -69,6 +118,35 @@ impl Board {
 
     pub fn domino_values_mut(&mut self, id: domino::Id) -> &mut domino::Values {
         &mut self.dominoes.get_mut(&id).unwrap().values
+    }
+
+    pub fn neighbor_of(&self, position: Position, direction: Direction) -> Option<Tile> {
+        let Position { x, y } = position;
+        let left = position.x.checked_sub(1);
+        let right = position.x.checked_add(1).filter(|x| *x < self.width);
+        let top = position.y.checked_sub(1);
+        let bottom = position.y.checked_add(1).filter(|y| *y < self.height());
+        let neighbor_position = match direction {
+            Direction::N => Position { x, y: top? },
+            Direction::NE => Position { x: right?, y: top? },
+            Direction::E => Position { x: right?, y },
+            Direction::SE => Position {
+                x: right?,
+                y: bottom?,
+            },
+            Direction::S => Position { x, y: bottom? },
+            Direction::SW => Position {
+                x: left?,
+                y: bottom?,
+            },
+            Direction::W => Position { x: left?, y },
+            Direction::NW => Position { x: left?, y: top? },
+        };
+        Some(self.tile(neighbor_position))
+    }
+
+    pub fn all_neighbors_of<'a>(&'a self, position: Position) -> impl Iterator<Item = Tile> + 'a {
+        Direction::iter_all().filter_map(move |dir| self.neighbor_of(position, dir))
     }
 
     pub fn dominoes(&self) -> &std::collections::BTreeMap<domino::Id, Domino> {
