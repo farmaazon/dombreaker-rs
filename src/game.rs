@@ -3,6 +3,7 @@ pub mod domino;
 
 use std::collections::{BTreeMap, VecDeque};
 
+use crate::game::board::Board;
 use domino::Domino;
 
 pub const EXPLOSIVE_VALUE: domino::Value = 0;
@@ -30,6 +31,10 @@ impl Game {
 
     pub fn new_generated(input: &str) -> Self {
         Self::new(board::generator::generate_from_string(input))
+    }
+
+    pub fn board(&self) -> &Board {
+        &self.board
     }
 
     pub fn dominoes(&self) -> &BTreeMap<domino::Id, Domino> {
@@ -96,8 +101,8 @@ impl Game {
         for explosion in explosions.clone() {
             for tile in self.board.all_neighbors_of(*explosion) {
                 match tile {
-                    Tile::Empty => {}
-                    Tile::Head(id) | Tile::Tail(id) => exploded_queue.push_back(id),
+                    board::Tile::Empty => {}
+                    board::Tile::Head(id) | board::Tile::Tail(id) => exploded_queue.push_back(id),
                 }
             }
         }

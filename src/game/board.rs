@@ -42,7 +42,7 @@ pub enum Direction {
 }
 
 impl Direction {
-    fn next(self) -> Self {
+    pub fn next(self) -> Self {
         match self {
             Self::N => Self::NE,
             Self::NE => Self::E,
@@ -55,11 +55,11 @@ impl Direction {
         }
     }
 
-    fn iter(self) -> DirectionIter {
+    pub fn iter(self) -> DirectionIter {
         DirectionIter { next: self }
     }
 
-    fn iter_all() -> impl Iterator<Item = Direction> {
+    pub fn iter_all() -> impl Iterator<Item = Direction> {
         Self::N.iter().take(8)
     }
 }

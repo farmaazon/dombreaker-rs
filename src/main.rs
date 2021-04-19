@@ -1,19 +1,9 @@
 mod game;
+mod qt_ui;
 
-use game::board;
-
-const LEVEL: &str = r"
-----------
-|--------|
-||------||
-|||----|||
-||||--||||
-||||--||||
-|||----|||
-||------||
-|--------|
-";
+pub use log;
 
 fn main() {
-    let _board = board::generator::generate_from_string(LEVEL);
+    simple_logger::SimpleLogger::new().init().unwrap();
+    qt_ui::main();
 }
