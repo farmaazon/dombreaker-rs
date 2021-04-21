@@ -18,10 +18,10 @@ pub struct Game {
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DominoRemoved {
-    id: domino::Id,
-    exploded: bool,
-    hit_by_explosion: bool,
-    score_awarded: Score,
+    pub id: domino::Id,
+    pub exploded: bool,
+    pub hit_by_explosion: bool,
+    pub score_awarded: Score,
 }
 
 impl Game {
