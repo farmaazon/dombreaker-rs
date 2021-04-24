@@ -1,6 +1,6 @@
 use crate::game;
 use crate::game::{board, domino};
-use crate::log::{info, warn};
+use crate::log::info;
 use qmetaobject::*;
 use std::collections::HashSet;
 
@@ -16,7 +16,7 @@ pub struct Domino {
 }
 
 impl Domino {
-    fn new(id: domino::Id, domino: game::domino::Domino) -> DominoBox {
+    fn new_boxed(id: domino::Id, domino: game::domino::Domino) -> DominoBox {
         let created = Self {
             base: Default::default(),
             game_id: id,
@@ -52,16 +52,17 @@ impl SimpleListItem for DominoBox {
 pub struct Game {
     base: qt_base_class!(trait QObject),
 
-    board_width: qt_property!(board::Coord; NOTIFY game_changed),
-    board_height: qt_property!(board::Coord; NOTIFY game_changed),
-    dominoes: qt_property!(QPointer<SimpleListModel<DominoBox>>; READ dominoes NOTIFY game_changed),
+    board_width: qt_property!(board::Coord; NOTIFY board_changed),
+    board_height: qt_property!(board::Coord; NOTIFY board_changed),
+    dominoes: qt_property!(QPointer<SimpleListModel<DominoBox>>; READ dominoes NOTIFY dominoes_changed),
     score: qt_property!(game::Score; READ score NOTIFY score_changed),
     finished: qt_property!(bool; READ is_finished NOTIFY finished_changed),
 
     new_game: qt_method!(fn(&self, board_description: String)),
     domino_hit: qt_method!(fn(&self, id: domino::Id)),
 
-    game_changed: qt_signal!(),
+    board_changed: qt_signal!(),
+    dominoes_changed: qt_signal!(),
     score_changed: qt_signal!(),
     finished_changed: qt_signal!(),
 
@@ -82,22 +83,30 @@ impl Game {
     }
 
     fn new_game(&mut self, board_description: String) {
+        // Remove old dominoes and notify about the fact.
+        //
+        // This is needed to avoid situation (bug?) where cpp object of recreated
+        // SimpleListModel<DominoBox> have the same address as the old one - in such situation the qml is not properly
+        // refreshed (it assumes same address == same object).
+        self.m_dominoes = Default::default();
+        self.dominoes_changed();
         info!("Creating new game from:\n{}", board_description);
-        let board = board::generator::generate_from_string(&board_description);
-        let game = game::Game::new(board);
+        let game = game::Game::new_generated(&board_description);
         let dominoes: SimpleListModel<DominoBox> = game
             .dominoes()
             .iter()
-            .map(|(id, domino)| Domino::new(*id, *domino))
+            .map(|(id, domino)| Domino::new_boxed(*id, *domino))
             .collect();
-        self.m_dominoes = Default::default();
-        self.game_changed();
-        self.m_dominoes = QObjectBox::new(dominoes);
-        self.m_dominoes.pinned().get_or_create_cpp_object();
+
         self.board_width = game.board().width();
         self.board_height = game.board().height();
+        self.board_changed();
+
+        self.m_dominoes = QObjectBox::new(dominoes);
+        self.m_dominoes.pinned().get_or_create_cpp_object();
+        self.dominoes_changed();
+
         self.game = Some(game);
-        self.game_changed();
         self.score_changed();
         self.finished_changed();
     }

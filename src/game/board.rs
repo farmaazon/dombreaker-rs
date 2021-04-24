@@ -32,26 +32,26 @@ impl std::fmt::Debug for Position {
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Direction {
     N,
-    NE,
+    Ne,
     E,
-    SE,
+    Se,
     S,
-    SW,
+    Sw,
     W,
-    NW,
+    Nw,
 }
 
 impl Direction {
     pub fn next(self) -> Self {
         match self {
-            Self::N => Self::NE,
-            Self::NE => Self::E,
-            Self::E => Self::SE,
-            Self::SE => Self::S,
-            Self::S => Self::SW,
-            Self::SW => Self::W,
-            Self::W => Self::NW,
-            Self::NW => Self::N,
+            Self::N => Self::Ne,
+            Self::Ne => Self::E,
+            Self::E => Self::Se,
+            Self::Se => Self::S,
+            Self::S => Self::Sw,
+            Self::Sw => Self::W,
+            Self::W => Self::Nw,
+            Self::Nw => Self::N,
         }
     }
 
@@ -128,24 +128,24 @@ impl Board {
         let bottom = position.y.checked_add(1).filter(|y| *y < self.height());
         let neighbor_position = match direction {
             Direction::N => Position { x, y: top? },
-            Direction::NE => Position { x: right?, y: top? },
+            Direction::Ne => Position { x: right?, y: top? },
             Direction::E => Position { x: right?, y },
-            Direction::SE => Position {
+            Direction::Se => Position {
                 x: right?,
                 y: bottom?,
             },
             Direction::S => Position { x, y: bottom? },
-            Direction::SW => Position {
+            Direction::Sw => Position {
                 x: left?,
                 y: bottom?,
             },
             Direction::W => Position { x: left?, y },
-            Direction::NW => Position { x: left?, y: top? },
+            Direction::Nw => Position { x: left?, y: top? },
         };
         Some(self.tile(neighbor_position))
     }
 
-    pub fn all_neighbors_of<'a>(&'a self, position: Position) -> impl Iterator<Item = Tile> + 'a {
+    pub fn all_neighbors_of(&self, position: Position) -> impl Iterator<Item = Tile> + '_ {
         Direction::iter_all().filter_map(move |dir| self.neighbor_of(position, dir))
     }
 
@@ -177,7 +177,7 @@ impl Board {
         let removed = self
             .dominoes
             .remove(&domino)
-            .expect(&format!("Removing non-existing domino {}", domino));
+            .unwrap_or_else(|| panic!("Removing non-existing domino {}", domino));
         for tile_pos in &[removed.position, removed.tail_position()] {
             *self.tile_mut(*tile_pos) = Tile::Empty;
         }
