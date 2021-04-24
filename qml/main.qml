@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
-import Dombreaker.Game 1.0
+import QtQuick.Controls 2.15
+import Dombreaker.Models 1.0
 
 Window {
     width: board.width
@@ -20,6 +21,14 @@ Window {
         }
     }
 
+    Button {
+        anchors.centerIn: parent
+        text: "Try again!"
+        visible: game.finished
+
+        onClicked: recreate_game()
+    }
+
 
     property string level: "--------
 |------|
@@ -29,7 +38,7 @@ Window {
 ||----||
 |------|"
 
-    Game {
+    GameModel {
         id: game
     }
 

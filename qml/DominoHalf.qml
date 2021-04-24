@@ -6,7 +6,7 @@ Item {
     property int value;
     height: width
 
-    GridLayout {
+    Grid {
         columns: 3
 
         anchors.fill: parent

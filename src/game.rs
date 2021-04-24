@@ -45,6 +45,10 @@ impl Game {
         self.score
     }
 
+    pub fn is_finished(&self) -> bool {
+        self.dominoes().is_empty()
+    }
+
     pub fn hit_domino(&mut self, id: domino::Id) -> Vec<DominoRemoved> {
         let mut dominoes_removed = Vec::new();
         let mut exploded_queue = std::collections::VecDeque::new();
