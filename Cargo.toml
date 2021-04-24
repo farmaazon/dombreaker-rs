@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 itertools = "0.10.0"
 rand = "0.8.3"
-qmetaobject = { path = "../qmetaobject-rs/qmetaobject" }
+qmetaobject = { git = "https://github.com/farmaazon/qmetaobject-rs.git" }
 cstr = "0.2.8"
 log = "0.4.14"
 simple_logger = "1.11.0"
