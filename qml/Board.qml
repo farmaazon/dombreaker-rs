@@ -13,7 +13,18 @@ Rectangle {
 
     Component {
         id: brokenDominoComponent
-        BrokenDomino {}
+        Domino {
+            id: brokenDomino
+            PropertyAnimation on opacity {
+                from: 1.0
+                to: 0.0
+                duration: 1500.0
+                easing.type: Easing.InSine
+
+                onFinished: brokenDomino.destroy()
+            }
+        }
+
     }
 
     Repeater {
@@ -38,7 +49,7 @@ Rectangle {
                         tailValue: domino.tail_value,
                     }
                     if (brokenDominoComponent.createObject(board, properties) === null) {
-                        console.error("ERROR while creating BrokenDomino")
+                        console.error("ERROR while creating broken Domino")
                     }
                 }
             }

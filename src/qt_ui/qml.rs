@@ -4,7 +4,6 @@ qrc! {qt_ui_qmls,
     "dombreaker" {
         "qml/main.qml" as "main.qml",
         "qml/Board.qml" as "Board.qml",
-        "qml/BrokenDomino.qml" as "BrokenDomino.qml",
         "qml/Domino.qml" as "Domino.qml",
         "qml/DominoBackground.qml" as "DominoBackground.qml",
         "qml/DominoHalf.qml" as "DominoHalf.qml",
