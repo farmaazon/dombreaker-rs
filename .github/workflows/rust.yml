@@ -33,6 +33,7 @@ jobs:
         run: cargo build --verbose --release
       - name: Run tests
         run: cargo test --verbose
+        if: matrix.os != 'macos-latest'
       - name: Upload a Build Artifact (Linux)
         if: startsWith(matrix.os,'ubuntu')
         uses: actions/upload-artifact@v2.2.3
