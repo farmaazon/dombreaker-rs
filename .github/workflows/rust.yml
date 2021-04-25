@@ -13,37 +13,44 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }} 
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2.13.2
-      with:
-        version: 5.15.2
-        setup-python: false
-    - uses: actions/checkout@v2
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
-    - name: Upload a Build Artifact (Linux)
-      if: startsWith(matrix.os,'ubuntu')
-      uses: actions/upload-artifact@v2.2.3
-      with:
-        name: dombreaker-linux
-        path: target/release/dombreaker
-        if-no-files-found: error
-    - name: Upload a Build Artifact (Windows)
-      if: startsWith(matrix.os,'windows')
-      uses: actions/upload-artifact@v2.2.3
-      with:
-        name: dombreaker-windows
-        path: target/release/dombreaker.exe
-        if-no-files-found: error
-    - name: Upload a Build Artifact (macOS)
-      if: startsWith(matrix.os,'macos')
-      uses: actions/upload-artifact@v2.2.3
-      with:
-        name: dombreaker-linux
-        path: target/release/dombreaker
-        if-no-files-found: error
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: QtCache-${{ runner.os }}-5.12.2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.13.2
+        with:
+          version: 5.15.2
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          setup-python: false
+      - uses: actions/checkout@v2
+      - name: Build
+        run: cargo build --verbose --release
+      - name: Run tests
+        run: cargo test --verbose
+      - name: Upload a Build Artifact (Linux)
+        if: startsWith(matrix.os,'ubuntu')
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: dombreaker-linux
+          path: target/release/dombreaker
+          if-no-files-found: error
+      - name: Upload a Build Artifact (Windows)
+        if: startsWith(matrix.os,'windows')
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: dombreaker-windows
+          path: target/release/dombreaker.exe
+          if-no-files-found: error
+      - name: Upload a Build Artifact (macOS)
+        if: startsWith(matrix.os,'macos')
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: dombreaker-linux
+          path: target/release/dombreaker
+          if-no-files-found: error
