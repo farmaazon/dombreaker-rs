@@ -1,0 +1,49 @@
+name: Rust
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }} 
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2.13.2
+      with:
+        version: 5.15.2
+        setup-python: false
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+    - name: Upload a Build Artifact (Linux)
+      if: startsWith(matrix.os,'ubuntu')
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: dombreaker-linux
+        path: target/release/dombreaker
+        if-no-files-found: error
+    - name: Upload a Build Artifact (Windows)
+      if: startsWith(matrix.os,'windows')
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: dombreaker-windows
+        path: target/release/dombreaker.exe
+        if-no-files-found: error
+    - name: Upload a Build Artifact (macOS)
+      if: startsWith(matrix.os,'macos')
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: dombreaker-linux
+        path: target/release/dombreaker
+        if-no-files-found: error
