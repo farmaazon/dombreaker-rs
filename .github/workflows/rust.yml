@@ -38,12 +38,6 @@ jobs:
           mv target/release/dombreaker.exe pkg/dombreaker
           windeployqt pkg/dombreaker/dombreaker.exe
         if: startsWith(matrix.os,'windows')
-      - name: Prepare Package
-        run: |
-          ls target/release/
-          macdeployqt target/release/dombreaker
-          ls target/release/
-        if: startsWith(matrix.os,'macos')
       - name: Upload a Build Artifact (Linux)
         if: startsWith(matrix.os,'ubuntu')
         uses: actions/upload-artifact@v2.2.3
@@ -63,5 +57,5 @@ jobs:
         uses: actions/upload-artifact@v2.2.3
         with:
           name: dombreaker-macos
-          path: target/release/dombreaker.app
+          path: target/release/dombreaker
           if-no-files-found: error
