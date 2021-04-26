@@ -34,6 +34,12 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
         if: matrix.os != 'macos-latest'
+      - name: Windeployqt
+        run: |
+          mkdir dombreaker
+          mv target/release/dombreaker.exe dombreaker
+          windeployqt dombreaker/dombreaker.exe
+        if: startsWith(matrix.os,'windows')
       - name: Upload a Build Artifact (Linux)
         if: startsWith(matrix.os,'ubuntu')
         uses: actions/upload-artifact@v2.2.3
@@ -46,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.3
         with:
           name: dombreaker-windows
-          path: target/release/dombreaker.exe
+          path: dombreaker
           if-no-files-found: error
       - name: Upload a Build Artifact (macOS)
         if: startsWith(matrix.os,'macos')
