@@ -25,12 +25,11 @@ impl Iterator for DominoValuesGenerator {
 
     fn next(&mut self) -> Option<Self::Item> {
         let return_value = self.next;
-        let current_sum = self.next.head + self.next.tail;
-        self.next.tail = self.next.tail.saturating_sub(1);
-        self.next.head = self.next.head.saturating_add(1);
-        if self.next.tail < self.next.head {
-            self.next.tail = current_sum + 1;
-            self.next.head = 0;
+        if self.next.tail >= self.next.head {
+            self.next.head += 1;
+            self.next.tail = 0;
+        } else {
+            self.next.tail += 1;
         }
         Some(return_value)
     }
@@ -125,15 +124,15 @@ mod test {
             generated,
             [
                 (0, 0),
-                (0, 1),
-                (0, 2),
+                (1, 0),
                 (1, 1),
-                (0, 3),
-                (1, 2),
-                (0, 4),
-                (1, 3),
+                (2, 0),
+                (2, 1),
                 (2, 2),
-                (0, 5)
+                (3, 0),
+                (3, 1),
+                (3, 2),
+                (3, 3)
             ]
         )
     }
@@ -206,7 +205,7 @@ mod test {
         );
 
         let mut expected_values: HashSet<domino::Values> =
-            [(0, 0), (0, 1), (0, 2), (1, 1), (0, 3), (1, 2), (0, 4)]
+            [(0, 0), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2), (3, 0)]
                 .iter()
                 .map(|x| domino::Values::from(*x))
                 .collect();
