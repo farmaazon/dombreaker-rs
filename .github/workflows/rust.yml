@@ -1,0 +1,61 @@
+name: Rust
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: QtCache-${{ runner.os }}-5.12.2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.13.2
+        with:
+          version: 5.15.2
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          setup-python: false
+      - uses: actions/checkout@v2
+      - name: Build
+        run: cargo build --verbose --release
+      - name: Prepare Package
+        run: |
+          mkdir pkg
+          mkdir pkg/dombreaker
+          mv target/release/dombreaker.exe pkg/dombreaker
+          windeployqt pkg/dombreaker/dombreaker.exe --qmldir qml
+        if: startsWith(matrix.os,'windows')
+      - name: Upload a Build Artifact (Linux)
+        if: startsWith(matrix.os,'ubuntu')
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: dombreaker-linux
+          path: target/release/dombreaker
+          if-no-files-found: error
+      - name: Upload a Build Artifact (Windows)
+        if: startsWith(matrix.os,'windows')
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: dombreaker-windows
+          path: pkg
+          if-no-files-found: error
+      - name: Upload a Build Artifact (macOS)
+        if: startsWith(matrix.os,'macos')
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: dombreaker-macos
+          path: target/release/dombreaker
+          if-no-files-found: error
