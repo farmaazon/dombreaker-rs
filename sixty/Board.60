@@ -1,0 +1,20 @@
+import { GameModel } from "./Models.60";
+import { DominoBackground } from "./DominoBackground.60";
+
+export Board := Rectangle {
+    property<length> tile-size: 80px;
+    property<GameModel> game;
+
+    callback domino-clicked(int);
+
+    width: game.board-width * tile-size;
+    height: game.board-height * tile-size;
+
+    for domino in game.dominoes: DominoBackground {
+        horizontal: domino.horizontal;
+        board-position: domino.board-position;
+        tile-size: root.tile-size;
+
+        clicked => { root.domino-clicked(domino.game-id) }
+    }
+}

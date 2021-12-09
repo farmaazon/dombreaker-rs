@@ -1,0 +1,19 @@
+import { Position } from "./Models.60";
+
+export DominoBackground := Rectangle {
+    property<Position> board-position;
+    property<length> tile-size;
+    property<bool> horizontal: false;
+
+    callback clicked <=> touch.clicked;
+
+    x: board-position.x * tile-size;
+    y: board-position.y * tile-size;
+    border-color: green;
+    border-width: 4px;
+    background: red;
+    width: horizontal ? 2*tile-size : tile-size;
+    height: horizontal ? tile-size : 2*tile-size;
+
+    touch := TouchArea {}
+}

@@ -1,0 +1,20 @@
+export struct Position := {
+    x: int,
+    y: int,
+}
+
+export struct DominoModel := {
+    game-id: int,
+    board-position: Position,
+    head-value: int,
+    tail-value: int,
+    horizontal: bool,
+}
+
+export struct GameModel := {
+    board-width: int,
+    board-height: int,
+    dominoes: [DominoModel],
+    score: int,
+    finished: bool,
+}

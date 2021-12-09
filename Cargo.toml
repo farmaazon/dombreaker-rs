@@ -5,13 +5,18 @@ authors = ["Adam Obuchowicz <farmaazon@gmail.com>"]
 edition = "2021"
 
 [features]
-default = ["qmetaobject"]
+qml_ui = ["qmetaobject", "cstr"]
+sixtyfps_ui = ["sixtyfps", "sixtyfps-build"]
 
 [dependencies]
+cfg-if = "1.0.0"
 itertools = "0.10.0"
 rand = "0.8.3"
 qmetaobject = { version = "0.2.5", optional = true }
-cstr = "0.2.8"
+cstr = { version = "0.2.8", optional = true }
 log = "0.4.14"
 simple_logger = "1.11.0"
 sixtyfps = { version = "0.1.5", optional = true }
+
+[build-dependencies]
+sixtyfps-build = { version = "0.1.5", optional = true }

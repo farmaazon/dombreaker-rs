@@ -1,0 +1,17 @@
+import { Board } from "./Board.60";
+import { GameModel } from "./Models.60";
+
+export Main := Window {
+    property<GameModel> game;
+    callback domino-clicked <=> board.domino-clicked;
+
+    VerticalLayout {
+        Text {
+            text: "Score: " + root.game.score;
+        }
+
+        board := Board {
+            game: root.game;
+        }
+    }
+}
