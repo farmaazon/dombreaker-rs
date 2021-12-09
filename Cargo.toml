@@ -2,12 +2,16 @@
 name = "dombreaker"
 version = "0.1.0"
 authors = ["Adam Obuchowicz <farmaazon@gmail.com>"]
-edition = "2018"
+edition = "2021"
+
+[features]
+default = ["qmetaobject"]
 
 [dependencies]
 itertools = "0.10.0"
 rand = "0.8.3"
-qmetaobject = { git = "https://github.com/farmaazon/qmetaobject-rs.git" }
+qmetaobject = { version = "0.2.5", optional = true }
 cstr = "0.2.8"
 log = "0.4.14"
 simple_logger = "1.11.0"
+sixtyfps = { version = "0.1.5", optional = true }
