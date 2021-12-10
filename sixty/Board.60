@@ -1,4 +1,4 @@
-import { GameModel } from "./Models.60";
+import { GameModel, DominoModel } from "./Models.60";
 import { DominoBackground } from "./DominoBackground.60";
 
 export Board := Rectangle {

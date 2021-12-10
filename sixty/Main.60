@@ -1,8 +1,9 @@
 import { Board } from "./Board.60";
-import { GameModel } from "./Models.60";
+import { GameModel, DominoModel } from "./Models.60";
 
 export Main := Window {
     property<GameModel> game;
+    // property<[DominoModel]> dominoes;
     callback domino-clicked <=> board.domino-clicked;
 
     VerticalLayout {
