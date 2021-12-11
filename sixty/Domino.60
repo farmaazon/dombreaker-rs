@@ -1,0 +1,67 @@
+import { Position } from "./Models.60";
+
+Dot := Rectangle {
+    property <bool> shown: false;
+
+    width:
+    height: width;
+
+    if shown: Rectangle {
+        border-radius: width/2.0;
+        background: black;
+    }
+}
+
+DominoHalf := Rectangle {
+    property<int> value;
+
+    height: width;
+
+    GridLayout {
+        spacing: root.width / 8;
+
+        Row {
+            Dot { shown: root.value >= 4; }
+            Dot { shown: root.value >= 8; }
+            Dot { shown: root.value >= 2; }
+        }
+
+        Row {
+            Dot { shown: root.value >= 6 }
+            Dot { shown: root.value % 2 == 1 }
+            Dot { shown: root.value >= 6 }
+        }
+
+        Row {
+            Dot { shown: root.value >= 2 }
+            Dot { shown: root.value >= 8 }
+            Dot { shown: root.value >= 4 }
+        }
+    }
+}
+
+export DominoBackground := Rectangle {
+    property<Position> board-position;
+    property<length> tile-size;
+    property<bool> horizontal: false;
+
+    callback clicked <=> touch.clicked;
+
+    x: board-position.x * tile-size;
+    y: board-position.y * tile-size;
+    border-color: green;
+    border-width: 4px;
+    background: red;
+    width: horizontal ? 2*tile-size : tile-size;
+    height: horizontal ? tile-size : 2*tile-size;
+
+    touch := TouchArea {}
+}
+
+export Domino := DominoBackground {
+    property<int> head-value;
+    property<int> tail-value;
+    property<bool> horizontal;
+
+    if horizontal: 
+}
