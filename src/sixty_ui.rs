@@ -26,15 +26,13 @@ fn create_dominoes_model(game: &Game) -> Rc<VecModel<DominoModel>> {
     Rc::new(VecModel::from(dominoes))
 }
 
-fn create_game_model(game: &Game) -> GameModel {
+fn initialize_game_model(model: &GameModel, game: &Game) {
     let dominoes = create_dominoes_model(game);
-    GameModel {
-        board_width: game.board().width() as i32,
-        board_height: game.board().height() as i32,
-        dominoes: ModelHandle::new(dominoes),
-        score: game.score() as i32,
-        finished: game.is_finished(),
-    }
+    model.set_board_width(game.board().width() as i32);
+    model.set_board_height(game.board().height() as i32);
+    model.set_dominoes(ModelHandle::new(dominoes));
+    model.set_score(game.score() as i32);
+    model.set_finished(game.is_finished());
 }
 
 fn update_dominoes(removed_dominoes: &[DominoRemoved], dominoes: &VecModel<DominoModel>) {
@@ -50,16 +48,17 @@ fn update_dominoes(removed_dominoes: &[DominoRemoved], dominoes: &VecModel<Domin
     }
 }
 
-fn update_game_model(game: &Game, removed_dominoes: &[DominoRemoved], model: &mut GameModel) {
-    model.score += removed_dominoes
+fn update_game_model(model: &GameModel, game: &Game, removed_dominoes: &[DominoRemoved]) {
+    let score_gained = removed_dominoes
         .iter()
         .map(|d| d.score_awarded as i32)
         .sum::<i32>();
-    model.finished = game.is_finished();
+    model.set_score(model.get_score() + score_gained);
+    model.set_finished(game.is_finished());
     update_dominoes(
         removed_dominoes,
         model
-            .dominoes
+            .get_dominoes()
             .as_any()
             .downcast_ref::<VecModel<DominoModel>>()
             .unwrap(),
@@ -77,17 +76,17 @@ const LEVEL: &str = "--------\n\
 pub fn main() {
     let main_window = Main::new();
     let game = Game::new_generated(&LEVEL);
-    let model = create_game_model(&game);
-    main_window.set_game(model);
+    let model = main_window.global::<GameModel>();
+    initialize_game_model(&model, &game);
 
     let game = RefCell::new(game);
     let weak = main_window.as_weak();
-    main_window.on_domino_clicked(move |id| {
+    model.on_domino_clicked(move |id| {
         let main_window = weak.upgrade().unwrap();
+        let model = main_window.global::<GameModel>();
         let result = game.borrow_mut().hit_domino(id as domino::Id);
-        let mut model = main_window.get_game();
-        update_game_model(&*game.borrow(), &result, &mut model);
-        main_window.set_game(model);
+        update_game_model(&model, &*game.borrow(), &result);
     });
+
     main_window.run();
 }

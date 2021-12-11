@@ -11,10 +11,12 @@ export struct DominoModel := {
     horizontal: bool,
 }
 
-export struct GameModel := {
-    board-width: int,
-    board-height: int,
-    dominoes: [DominoModel],
-    score: int,
-    finished: bool,
+export global GameModel := {
+    property <int> board-width;
+    property <int> board-height;
+    property <[DominoModel]> dominoes;
+    property <int> score;
+    property <bool> finished;
+
+    callback domino-clicked(int);
 }
