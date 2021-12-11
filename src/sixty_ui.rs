@@ -65,6 +65,28 @@ fn update_game_model(model: &GameModel, game: &Game, removed_dominoes: &[DominoR
     );
 }
 
+fn is_dot_visible(
+    DotInfo {
+        mut row,
+        mut col,
+        is_horizontal,
+        value,
+    }: DotInfo,
+) -> bool {
+    const VERTICAL_THRESHOLDS: [[i32; 3]; 3] = [[4, 8, 2], [6, 0, 6], [2, 8, 4]];
+    log::info!("Asked for {}, {} value: {}", row, col, value);
+    if is_horizontal {
+        let new_col = 2 - row;
+        row = col;
+        col = new_col;
+    }
+    if row == 1 && col == 1 {
+        value % 2 == 1
+    } else {
+        value >= VERTICAL_THRESHOLDS[row as usize][col as usize]
+    }
+}
+
 const LEVEL: &str = "--------\n\
                     |------|\n\
                     ||----||\n\
@@ -77,7 +99,10 @@ pub fn main() {
     let main_window = Main::new();
     let game = Game::new_generated(&LEVEL);
     let model = main_window.global::<GameModel>();
+    let info = main_window.global::<DominoInfo>();
+
     initialize_game_model(&model, &game);
+    info.on_is_dot_visible(is_dot_visible);
 
     let game = RefCell::new(game);
     let weak = main_window.as_weak();

@@ -1,7 +1,8 @@
 import { Board } from "./Board.60";
+import { DotInfo, DominoInfo } from "./Domino.60";
 import { GameModel, DominoModel } from "./Models.60";
 
-export { GameModel }
+export { DotInfo, DominoInfo, GameModel }
 
 export Main := Window {
     VerticalLayout {

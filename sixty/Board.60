@@ -1,16 +1,16 @@
 import { GameModel } from "./Models.60";
-import { DominoBackground } from "./DominoBackground.60";
+import { Domino, DominoBackground, DominoInfo } from "./Domino.60";
 
 export Board := Rectangle {
-    property<length> tile-size: 80px;
 
-    width: GameModel.board-width * tile-size;
-    height: GameModel.board-height * tile-size;
+    width: GameModel.board-width * DominoInfo.tile-size;
+    height: GameModel.board-height * DominoInfo.tile-size;
 
-    for domino in GameModel.dominoes: DominoBackground {
-        horizontal: domino.horizontal;
+    for domino in GameModel.dominoes: Domino {
+        is-horizontal: domino.horizontal;
         board-position: domino.board-position;
-        tile-size: root.tile-size;
+        head-value: domino.head-value;
+        tail-value: domino.tail-value;
 
         clicked => { GameModel.domino-clicked(domino.game-id) }
     }

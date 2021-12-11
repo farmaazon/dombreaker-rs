@@ -1,59 +1,71 @@
 import { Position } from "./Models.60";
 
-Dot := Rectangle {
-    property <bool> shown: false;
+export struct DotInfo := {
+    row: int,
+    col: int,
+    value: int,
+    is-horizontal: bool,
+}
 
-    width:
-    height: width;
+export global DominoInfo := {
+    property<length> tile-size: 80px;
+    property<length> margin: 8px;
+    property<length> dot-size: 16px;
+    property<length> inner-size: tile-size - 2*margin;
+    property<length> dot-spacing: (inner-size - dot-size*3)/2;
 
-    if shown: Rectangle {
-        border-radius: width/2.0;
-        background: black;
-    }
+    callback is_dot_visible(DotInfo) -> bool;
 }
 
 DominoHalf := Rectangle {
     property<int> value;
+    property<bool> is-horizontal;
 
-    height: width;
+    width: DominoInfo.tile-size;
+    height: DominoInfo.tile-size;
 
-    GridLayout {
-        spacing: root.width / 8;
+    VerticalLayout {
+        padding: DominoInfo.margin;
+        spacing: DominoInfo.dot-spacing;
 
-        Row {
-            Dot { shown: root.value >= 4; }
-            Dot { shown: root.value >= 8; }
-            Dot { shown: root.value >= 2; }
-        }
+        for row in 3: HorizontalLayout {
+            property<int> dot_row: row;
+            spacing: DominoInfo.dot-spacing;
 
-        Row {
-            Dot { shown: root.value >= 6 }
-            Dot { shown: root.value % 2 == 1 }
-            Dot { shown: root.value >= 6 }
-        }
+            for col in 3: Rectangle {
+                property <bool> shown: DominoInfo.is_dot_visible({
+                    row: parent.dot_row,
+                    col: col,
+                    value: root.value,
+                    is-horizontal: root.is-horizontal,
+                });
 
-        Row {
-            Dot { shown: root.value >= 2 }
-            Dot { shown: root.value >= 8 }
-            Dot { shown: root.value >= 4 }
+                max-width: DominoInfo.dot-size;
+                max-height: DominoInfo.dot-size;
+
+                if shown: Rectangle {
+                    border-radius: width/2.0;
+                    background: black;
+                }
+            }
         }
     }
 }
 
 export DominoBackground := Rectangle {
     property<Position> board-position;
-    property<length> tile-size;
-    property<bool> horizontal: false;
+    property<bool> is-horizontal: false;
 
     callback clicked <=> touch.clicked;
 
-    x: board-position.x * tile-size;
-    y: board-position.y * tile-size;
+    x: board-position.x * DominoInfo.tile-size;
+    y: board-position.y * DominoInfo.tile-size;
     border-color: green;
     border-width: 4px;
     background: red;
-    width: horizontal ? 2*tile-size : tile-size;
-    height: horizontal ? tile-size : 2*tile-size;
+
+    width : (is-horizontal ? 2 : 1) * DominoInfo.tile-size;
+    height: (is-horizontal ? 1 : 2) * DominoInfo.tile-size;
 
     touch := TouchArea {}
 }
@@ -61,7 +73,38 @@ export DominoBackground := Rectangle {
 export Domino := DominoBackground {
     property<int> head-value;
     property<int> tail-value;
-    property<bool> horizontal;
 
-    if horizontal: 
+    head := DominoHalf {
+        value: root.head-value;
+        is-horizontal: root.is-horizontal;
+    }
+
+    separator := Rectangle {
+        background: darkred;
+    }
+
+    tail := DominoHalf {
+        value: root.tail-value;
+        is-horizontal: root.is-horizontal;
+    }
+
+    states [
+        horizontal when is-horizontal: {
+            separator.x: DominoInfo.tile-size - separator.width / 2;
+            separator.y: DominoInfo.margin;
+            separator.width: 2px;
+            separator.height: DominoInfo.inner-size;
+            tail.x: DominoInfo.tile-size;
+            tail.y: 0px;
+        }
+
+        vertical when !is-horizontal: {
+            separator.x: DominoInfo.margin;
+            separator.y: DominoInfo.tile-size - separator.height / 2;
+            separator.width: DominoInfo.inner-size;
+            separator.height: 2px;
+            tail.x: 0px;
+            tail.y: DominoInfo.tile-size;
+        }
+    ]
 }
