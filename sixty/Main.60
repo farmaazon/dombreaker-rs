@@ -1,4 +1,5 @@
 import { Board } from "./Board.60";
+import { Button } from "sixtyfps_widgets.60";
 import { DotInfo, DominoInfo } from "./Domino.60";
 import { GameModel, DominoModel } from "./Models.60";
 
@@ -11,5 +12,9 @@ export Main := Window {
         }
 
         board := Board {}
+    }
+
+    if GameModel.finished: Button {
+        text: "Try again!";
     }
 }
