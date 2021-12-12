@@ -21,4 +21,5 @@ export global GameModel := {
     property <bool> finished;
 
     callback domino-clicked(int);
+    callback restart;
 }

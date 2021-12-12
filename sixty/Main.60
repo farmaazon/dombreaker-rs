@@ -13,8 +13,17 @@ export Main := Window {
 
         board := Board {}
     }
+    if GameModel.finished: VerticalLayout {
+        alignment: center;
 
-    if GameModel.finished: Button {
-        text: "Try again!";
+        HorizontalLayout {
+            alignment: center;
+
+            Button {
+                text: "Try again!";
+                clicked => { GameModel.restart() }
+            }
+        }
     }
+
 }

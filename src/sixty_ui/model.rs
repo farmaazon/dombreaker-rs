@@ -93,6 +93,11 @@ impl Handler {
         }
     }
 
+    pub fn reinitialize(&mut self, game: &Game) {
+        let main = self.main.upgrade().unwrap();
+        *self = Handler::initialize(&main, game);
+    }
+
     pub fn update(&self, game: &Game, removed_dominoes: &[DominoRemoved]) {
         let main = self.main.upgrade().unwrap();
         let game_model = main.global::<GameModel>();
