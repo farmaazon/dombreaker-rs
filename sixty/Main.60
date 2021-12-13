@@ -1,0 +1,29 @@
+import { Board } from "./Board.60";
+import { Button } from "sixtyfps_widgets.60";
+import { DotInfo, DominoInfo } from "./Domino.60";
+import { GameModel, DominoModel } from "./Models.60";
+
+export { DotInfo, DominoInfo, GameModel }
+
+export Main := Window {
+    VerticalLayout {
+        Text {
+            text: "Score: " + GameModel.score;
+        }
+
+        board := Board {}
+    }
+    if GameModel.finished: VerticalLayout {
+        alignment: center;
+
+        HorizontalLayout {
+            alignment: center;
+
+            Button {
+                text: "Try again!";
+                clicked => { GameModel.restart() }
+            }
+        }
+    }
+
+}

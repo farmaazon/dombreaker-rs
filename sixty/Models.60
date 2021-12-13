@@ -1,0 +1,25 @@
+export struct Position := {
+    x: int,
+    y: int,
+}
+
+export struct DominoModel := {
+    game-id: int,
+    board-position: Position,
+    head-value: int,
+    tail-value: int,
+    horizontal: bool,
+    disappearing: bool,
+}
+
+export global GameModel := {
+    property <int> board-width;
+    property <int> board-height;
+    property <[DominoModel]> dominoes;
+    property <[DominoModel]> broken-dominoes;
+    property <int> score;
+    property <bool> finished;
+
+    callback domino-clicked(int);
+    callback restart;
+}

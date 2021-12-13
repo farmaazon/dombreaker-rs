@@ -1,0 +1,28 @@
+import { GameModel } from "./Models.60";
+import { Domino, DominoBackground, DominoInfo } from "./Domino.60";
+
+export Board := Rectangle {
+
+    width: GameModel.board-width * DominoInfo.tile-size;
+    height: GameModel.board-height * DominoInfo.tile-size;
+
+    for domino in GameModel.dominoes: DominoBackground {
+        is-horizontal: domino.horizontal;
+        board-position: domino.board-position;
+
+        clicked => { GameModel.domino-clicked(domino.game-id) }
+    }
+
+    for domino in GameModel.broken-dominoes:  Domino {
+        is-horizontal: domino.horizontal;
+        board-position: domino.board-position;
+        head-value: domino.head-value;
+        tail-value: domino.tail-value;
+        opacity: domino.disappearing ? 0 : 1;
+
+        animate opacity {
+            duration: 1000ms;
+            easing: ease-in;
+        }
+    }
+}

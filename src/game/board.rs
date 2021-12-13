@@ -3,7 +3,7 @@ pub mod generator;
 use crate::game::domino;
 use crate::game::domino::Domino;
 
-pub type Coord = u8;
+pub type Coord = u32;
 
 #[derive(Copy, Clone, Eq, Hash, PartialEq)]
 pub struct Position {
@@ -12,7 +12,7 @@ pub struct Position {
 }
 
 impl From<(Coord, Coord)> for Position {
-    fn from((x, y): (u8, u8)) -> Self {
+    fn from((x, y): (Coord, Coord)) -> Self {
         Position { x, y }
     }
 }
@@ -109,7 +109,7 @@ impl Board {
     }
 
     pub fn height(&self) -> Coord {
-        self.tiles.len() as u8 / self.width
+        self.tiles.len() as Coord / self.width
     }
 
     pub fn tile(&self, position: Position) -> Tile {
@@ -153,7 +153,7 @@ impl Board {
         &self.dominoes
     }
 
-    pub fn put_domino(&mut self, domino: Domino) -> u8 {
+    pub fn put_domino(&mut self, domino: Domino) -> domino::Id {
         let new_id = self.next_domino_id;
         for (tile_pos, new_tile) in &[
             (domino.position, Tile::Head(new_id)),
@@ -173,7 +173,7 @@ impl Board {
         new_id
     }
 
-    pub fn remove_domino(&mut self, domino: u8) -> Domino {
+    pub fn remove_domino(&mut self, domino: domino::Id) -> Domino {
         let removed = self
             .dominoes
             .remove(&domino)

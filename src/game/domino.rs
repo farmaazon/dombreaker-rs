@@ -1,7 +1,7 @@
 use crate::game::board::Position;
 use std::fmt;
 
-pub type Id = u8;
+pub type Id = u32;
 pub type Value = u8;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
