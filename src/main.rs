@@ -16,8 +16,8 @@ fn main() {
         } else if #[cfg(feature = "qml_ui")] {
             qt_ui::main();
         } else {
-            compile_error!("No UI framework enabled. Please run cargo with `--feature sixtyfps` or \
-            `--feature qt` option");
+            compile_error!("No UI framework enabled. Please run cargo with `--features sixtyfps` or \
+            `--features qt` option");
         }
     }
 }
